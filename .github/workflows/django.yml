@@ -37,6 +37,10 @@ jobs:
           npm install
           npm run build
 
+      - name: Create staticfiles directory
+        run: |
+          mkdir -p app/staticfiles   
+
       - name: Run migrations
         env:
           DJANGO_SETTINGS_MODULE: webapp.settings

@@ -25,14 +25,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Copiar o projeto
+
 COPY . .
 
 # Instalar dependências do Node.js e compilar Tailwind
 WORKDIR /app/app/theme/static_src
 RUN npm install --include=dev && npm run build
 
-# Coletar arquivos estáticos (sem migrações nesta fase)
 WORKDIR /app/app
 RUN python manage.py collectstatic --noinput --skip-checks
 
@@ -48,10 +47,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt && pip install gunicorn
 
-# Copiar apenas o necessário do builder
 COPY --from=builder /app /app
 
-# Criar script de inicialização
 RUN echo '#!/bin/bash\ncd /app/app\npython manage.py migrate\nexec gunicorn webapp.wsgi:application --bind 0.0.0.0:8000' > /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
 
