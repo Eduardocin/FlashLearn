@@ -17,8 +17,11 @@ class AuthTest(TestCase):
         """Testa o registro de um novo usuário."""
         response = self.client.post(reverse('register'), {
             'username': 'newuser',
-            'password1': 'newpassword123',
-            'password2': 'newpassword123'
+            'email': 'newuser@example.com', 
+            'password1': 'ComplexPass123!',  
+            'password2': 'ComplexPass123!',
         })
-        self.assertEqual(response.status_code, 200)  # Redireciona ao sucesso
+        
+        # Verifica redirecionamento após sucesso (302)
+        self.assertEqual(response.status_code, 302)
         self.assertTrue(User.objects.filter(username='newuser').exists())
