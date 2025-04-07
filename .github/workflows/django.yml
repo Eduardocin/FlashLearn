@@ -1,0 +1,54 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - main  
+  pull_request:
+    branches:
+      - main  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do código
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      # Instalar dependências do Python
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Configurar Node.js para compilar Tailwind
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Instalar dependências do Tailwind
+      - name: Install Tailwind dependencies
+        run: |
+          cd app/theme/static_src
+          npm install
+          npm run build
+
+      # Executar migrações do banco de dados SQLite
+      - name: Run migrations
+        run: |
+          python app/manage.py makemigrations
+          python app/manage.py migrate
+
+      # Executar testes
+      - name: Run tests
+        run: |
+          python app/manage.py test
