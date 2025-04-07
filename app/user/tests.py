@@ -22,6 +22,6 @@ class AuthTest(TestCase):
             'password2': 'ComplexPass123!',
         })
         
-        # Verifica redirecionamento após sucesso (302)
+        # Verifica redirecionamento após sucesso
         self.assertEqual(response.status_code, 302)
         self.assertTrue(User.objects.filter(username='newuser').exists())
