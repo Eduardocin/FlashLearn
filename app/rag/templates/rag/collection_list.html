@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Cabeçalho -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white">
+                Criar <span class="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Flashcards</span>
+            </h1>
+            <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">Organize seus materiais por sessao e gere flashcards com IA</p>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex justify-center mb-10">
+            <a href="{% url 'rag:collection_create' %}"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-semibold shadow-sm hover:shadow-md transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nova Sessão
+            </a>
+        </div>
+
+        {% if collections %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for collection in collections %}
+            <div class="group bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ collection.name }}</h3>
+                {% if collection.description %}
+                <p class="text-gray-500 dark:text-gray-400 mb-4 text-sm">{{ collection.description }}</p>
+                {% endif %}
+                <div class="flex gap-4 text-sm text-gray-400 dark:text-gray-500 mb-5">
+                    <span>{{ collection.document_count }} material{{ collection.document_count|pluralize:"is" }} enviado{{ collection.document_count|pluralize:"s" }}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url 'rag:collection_detail' collection.pk %}"
+                       class="px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 text-sm font-medium transition-colors">
+                        Ver Detalhes
+                    </a>
+                    <a href="{% url 'rag:study_mode_collection' collection.pk %}"
+                       class="px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 text-sm font-medium transition-colors">
+                        📖 Estudar
+                    </a>
+                    <a href="{% url 'rag:collection_delete' collection.pk %}"
+                       class="px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-500/20 text-sm font-medium transition-colors">
+                        Excluir
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="max-w-md mx-auto text-center py-16">
+            <div class="text-6xl mb-4">📚</div>
+            <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Nenhuma sessão ainda</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Crie sua primeira sessão de estudo e envie materiais para começar!</p>
+            <a href="{% url 'rag:collection_create' %}"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-semibold shadow-sm hover:shadow-md transition-all">
+                Criar Primeira Sessão
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

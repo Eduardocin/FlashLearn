@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pt-8 px-2 md:px-4 lg:px-8 pb-16">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+                📄 {{ document.title }}
+            </h1>
+            <div class="flex gap-4 justify-center text-sm text-gray-500 dark:text-gray-400">
+                <span class="uppercase font-semibold">{{ document.file_type }}</span>
+                <span class="{% if document.status == 'completed' %}text-green-600{% elif document.status == 'failed' %}text-red-600{% else %}text-gray-500{% endif %} font-medium">{{ document.get_status_display }}</span>
+                <span>Sessao: {{ document.collection.name }}</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">
+                Enviado em {{ document.uploaded_at|date:"d/m/Y H:i" }}
+                {% if document.processed_at %}
+                · Processado em {{ document.processed_at|date:"d/m/Y H:i" }}
+                {% endif %}
+            </p>
+        </div>
+
+        {% if document.status == 'failed' %}
+        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-6 text-center">
+            <p class="text-red-600 font-semibold">⚠ Erro no processamento:</p>
+            <p class="text-red-500 text-sm">{{ document.error_message }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Trechos do documento -->
+        {% if chunks %}
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Trechos do documento</h2>
+        <div class="space-y-3">
+            {% for chunk in chunks %}
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ chunk.content|truncatewords:80 }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <p>Nenhum trecho processado para este documento.</p>
+        </div>
+        {% endif %}
+
+        <!-- Ações -->
+        <div class="text-center mt-8 flex gap-3 justify-center">
+            <a href="{% url 'rag:collection_detail' document.collection.pk %}"
+               class="text-orange-500 hover:text-orange-600 font-semibold">
+                ← Voltar à Coleção
+            </a>
+            <a href="{% url 'rag:document_delete' document.pk %}"
+               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">
+                Excluir Documento
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

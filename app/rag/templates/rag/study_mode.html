@@ -1,0 +1,333 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="pt-6 px-2 md:px-4 lg:px-6 pb-16">
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">
+             Modo <span class="text-orange-500">Estudo</span>
+        </h1>
+        {% if collection %}
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ collection.name }}</p>
+        {% endif %}
+        <p class="text-xs text-gray-400 mt-1" id="progress-text">0 / {{ total }} flashcards</p>
+    </div>
+
+    {% if flashcards_json %}
+    <!-- Layout: Flashcard (esq) + Chat (dir) -->
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
+
+        <!--  COLUNA ESQUERDA: Flashcard  -->
+        <div class="w-full lg:w-1/2 xl:w-3/5">
+
+            <!-- Flashcard -->
+            <div id="flashcard-container">
+                <div id="flashcard"
+                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 cursor-pointer select-none min-h-[220px] flex items-center justify-center border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-shadow"
+                     onclick="flipCard()">
+                    <div id="card-front" class="text-center w-full">
+                        <p class="text-xs text-orange-500 font-semibold mb-3 uppercase tracking-widest" id="card-type-badge">Padrão</p>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white" id="card-title">Carregando...</h2>
+                        <p class="text-xs text-gray-400 mt-5">Toque para ver a resposta</p>
+                    </div>
+                    <div id="card-back" class="text-center w-full hidden">
+                        <p class="text-xs text-green-600 font-semibold mb-3 uppercase tracking-widest">Resposta</p>
+                        <p class="text-lg text-gray-700 dark:text-gray-200" id="card-content"></p>
+                    </div>
+                </div>
+
+                <!-- Botões de resposta -->
+                <div id="answer-buttons" class="flex justify-center gap-4 mt-5 hidden">
+                    <button onclick="answerCard(false)"
+                            class="px-7 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 font-bold text-base shadow-sm hover:shadow-md transition-all active:scale-95">
+                         Errei
+                    </button>
+                    <button onclick="answerCard(true)"
+                            class="px-7 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold text-base shadow-sm hover:shadow-md transition-all active:scale-95">
+                         Acertei
+                    </button>
+                </div>
+            </div>
+
+            <!-- Painel RAG Assist -->
+            <div id="assist-panel" class="hidden mt-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 border-l-4 border-orange-500">
+                    <h3 class="text-sm font-bold text-orange-500 mb-2"> Análise da IA</h3>
+                    <div id="assist-explanation" class="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed"></div>
+
+                    <div id="assist-sources" class="mb-3">
+                        <p class="text-xs font-semibold text-gray-400 mb-1"> Fontes dos seus materiais:</p>
+                        <div id="sources-list" class="space-y-1"></div>
+                    </div>
+
+                    <div id="assist-corrective" class="hidden">
+                        <p class="text-xs font-semibold text-gray-400 mb-1"> Flashcards Corretivos:</p>
+                        <div id="corrective-list" class="space-y-2 mb-3"></div>
+                        <button id="save-corrective-btn" onclick="saveCorrectiveCards()"
+                                class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-semibold">
+                             Salvar Flashcards Corretivos
+                        </button>
+                    </div>
+
+                    <button onclick="nextCard()" class="mt-4 px-5 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-semibold">
+                        Próximo 
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resultado Final -->
+            <div id="results-panel" class="hidden mt-6 text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <div class="text-5xl mb-3"></div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Sessão Concluída!</h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-5">
+                        Acertos: <span id="correct-count" class="text-green-600 font-bold text-lg">0</span>
+                        / <span id="total-count">{{ total }}</span>
+                    </p>
+                    <div class="flex gap-3 justify-center flex-wrap">
+                        <button onclick="restartStudy()" class="px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-semibold text-sm">
+                             Estudar Novamente
+                        </button>
+                        <a href="{% url 'flashcards:home_flashcards' %}" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold text-sm">
+                            Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--  COLUNA DIREITA: Chat  -->
+        <div class="w-full lg:w-1/2 xl:w-2/5 flex flex-col" style="height: 520px;">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col h-full overflow-hidden">
+                <!-- Cabeçalho do chat -->
+                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-base"></div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">Assistente de Estudos</p>
+                        <p class="text-xs text-gray-400">Tire dúvidas sobre o conteúdo</p>
+                    </div>
+                </div>
+
+                <!-- Mensagens -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                    <div class="flex gap-2">
+                        <div class="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-sm shrink-0"></div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%]">
+                            <p class="text-sm text-gray-700 dark:text-gray-200">Olá! Estou aqui para te ajudar com dúvidas sobre o conteúdo desta sessão.{% if collection %} Tenho acesso aos materiais de <strong>{{ collection.name }}</strong>.{% endif %} Pode perguntar!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input -->
+                <div class="px-3 py-3 border-t border-gray-100 dark:border-gray-700">
+                    <form id="chat-form" class="flex gap-2" onsubmit="sendChatMessage(event)">
+                        <input id="chat-input" type="text" placeholder="Faça uma pergunta..."
+                               class="flex-1 text-sm px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+                        <button type="submit" id="chat-send-btn"
+                                class="px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="text-center py-16">
+        <div class="text-5xl mb-4"></div>
+        <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Nenhum flashcard disponível para estudo.</p>
+        <a href="{% url 'flashcards:home_flashcards' %}" class="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold">
+            Ir para Início
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+//  State 
+const flashcards = {{ flashcards_json|safe }};
+let currentIndex = 0;
+let correctCount = 0;
+let isFlipped = false;
+let currentReviewId = null;
+const csrfToken = '{{ csrf_token }}';
+const collectionId = '{{ collection_id|default:"" }}';
+const chatUrl = '{% url "rag:study_chat" %}';
+const reviewUrl = id => `/study/review/${id}/`;
+const saveCorrUrl = id => `/study/review/${id}/save-corrective/`;
+
+//  Flashcard 
+function showCard() {
+    if (currentIndex >= flashcards.length) { showResults(); return; }
+    const card = flashcards[currentIndex];
+    document.getElementById('card-title').textContent = card.title;
+    document.getElementById('card-content').textContent = card.content;
+    document.getElementById('card-type-badge').textContent = card.card_type || 'Padrão';
+    document.getElementById('card-front').classList.remove('hidden');
+    document.getElementById('card-back').classList.add('hidden');
+    document.getElementById('answer-buttons').classList.add('hidden');
+    document.getElementById('assist-panel').classList.add('hidden');
+    document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${flashcards.length} flashcards`;
+    isFlipped = false;
+}
+
+function flipCard() {
+    if (isFlipped) return;
+    isFlipped = true;
+    document.getElementById('card-front').classList.add('hidden');
+    document.getElementById('card-back').classList.remove('hidden');
+    document.getElementById('answer-buttons').classList.remove('hidden');
+}
+
+function answerCard(isCorrect) {
+    const card = flashcards[currentIndex];
+    document.getElementById('answer-buttons').classList.add('hidden');
+    const fd = new FormData();
+    fd.append('is_correct', isCorrect);
+    fd.append('confidence', 0);
+    fetch(reviewUrl(card.id), { method: 'POST', headers: {'X-CSRFToken': csrfToken}, body: fd })
+        .then(r => r.json())
+        .then(data => {
+            currentReviewId = data.review_id;
+            if (isCorrect) { correctCount++; nextCard(); }
+            else if (data.assist) { showAssist(data.assist, data.review_id); }
+            else { nextCard(); }
+        })
+        .catch(() => nextCard());
+}
+
+function showAssist(assist, reviewId) {
+    currentReviewId = reviewId;
+    const panel = document.getElementById('assist-panel');
+    panel.classList.remove('hidden');
+    document.getElementById('assist-explanation').innerHTML = (assist.explanation || '')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    const sourcesList = document.getElementById('sources-list');
+    sourcesList.innerHTML = '';
+    if (assist.sources && assist.sources.length) {
+        assist.sources.forEach(src => {
+            const d = document.createElement('div');
+            d.className = 'bg-gray-50 dark:bg-gray-700/50 p-2 rounded text-xs';
+            d.innerHTML = `<span class="font-semibold text-orange-500">${src.document_title || 'Fonte'}</span><p class="text-gray-500 dark:text-gray-400 mt-0.5">${src.excerpt || ''}</p>`;
+            sourcesList.appendChild(d);
+        });
+    } else {
+        sourcesList.innerHTML = '<p class="text-xs text-gray-400">Nenhum trecho encontrado nos seus materiais.</p>';
+    }
+    const correctiveDiv = document.getElementById('assist-corrective');
+    const correctiveList = document.getElementById('corrective-list');
+    if (assist.corrective_flashcards && assist.corrective_flashcards.length) {
+        correctiveList.innerHTML = '';
+        assist.corrective_flashcards.forEach(c => {
+            const d = document.createElement('div');
+            d.className = 'bg-blue-50 dark:bg-blue-900/20 p-2 rounded text-xs';
+            d.innerHTML = `<strong>${c.title}</strong><br><span class="text-gray-500">${c.content}</span>`;
+            correctiveList.appendChild(d);
+        });
+        correctiveDiv.classList.remove('hidden');
+    }
+}
+
+function saveCorrectiveCards() {
+    if (!currentReviewId) return;
+    const btn = document.getElementById('save-corrective-btn');
+    btn.disabled = true; btn.textContent = 'Salvando...';
+    fetch(saveCorrUrl(currentReviewId), { method: 'POST', headers: {'X-CSRFToken': csrfToken} })
+        .then(r => r.json())
+        .then(data => {
+            btn.textContent = data.status === 'success' ? ` ${data.message}` : 'Erro ao salvar';
+        })
+        .catch(() => { btn.textContent = 'Erro'; btn.disabled = false; });
+}
+
+function nextCard() {
+    currentIndex++;
+    showCard();
+}
+
+function showResults() {
+    document.getElementById('flashcard-container').classList.add('hidden');
+    document.getElementById('results-panel').classList.remove('hidden');
+    document.getElementById('correct-count').textContent = correctCount;
+}
+
+function restartStudy() {
+    currentIndex = 0; correctCount = 0; isFlipped = false;
+    document.getElementById('flashcard-container').classList.remove('hidden');
+    document.getElementById('results-panel').classList.add('hidden');
+    showCard();
+}
+
+//  Chat 
+function appendMessage(role, text) {
+    const container = document.getElementById('chat-messages');
+    const isUser = role === 'user';
+    const div = document.createElement('div');
+    div.className = `flex gap-2 ${isUser ? 'justify-end' : ''}`;
+    const safeText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    div.innerHTML = isUser
+        ? `<div class="bg-orange-500 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[85%] text-sm">${safeText}</div>`
+        : `<div class="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-sm shrink-0"></div>
+           <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] text-sm text-gray-700 dark:text-gray-200">${safeText}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendTyping() {
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.id = 'typing-indicator';
+    div.className = 'flex gap-2';
+    div.innerHTML = `<div class="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-sm shrink-0"></div>
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-gray-400">
+            <span class="inline-flex gap-1">
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+            </span>
+        </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+}
+
+function sendChatMessage(event) {
+    event.preventDefault();
+    const input = document.getElementById('chat-input');
+    const btn = document.getElementById('chat-send-btn');
+    const message = input.value.trim();
+    if (!message) return;
+
+    appendMessage('user', message);
+    input.value = '';
+    btn.disabled = true;
+    appendTyping();
+
+    const fd = new FormData();
+    fd.append('message', message);
+    if (collectionId) fd.append('collection_id', collectionId);
+
+    fetch(chatUrl, { method: 'POST', headers: {'X-CSRFToken': csrfToken}, body: fd })
+        .then(r => r.json())
+        .then(data => {
+            removeTyping();
+            appendMessage('bot', data.answer || data.error || 'Erro na resposta.');
+        })
+        .catch(() => {
+            removeTyping();
+            appendMessage('bot', 'Erro ao conectar ao assistente.');
+        })
+        .finally(() => { btn.disabled = false; });
+}
+
+// Iniciar
+if (flashcards.length > 0) showCard();
+</script>
+{% endblock %}

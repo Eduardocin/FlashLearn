@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pt-8 text-center px-2 md:px-4 lg:px-8 pb-16">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="mb-2 text-3xl font-extrabold text-gray-900 dark:text-white">
+            ✨ Gerar <span class="text-orange-500">Flashcards</span>
+        </h1>
+        <p class="text-gray-600 dark:text-gray-300 mb-8">
+            Gere flashcards baseados nos seus próprios materiais de estudo
+        </p>
+
+        <!-- Formulário -->
+        <div class="card shadow-lg p-8 text-left mb-8" style="border-radius: 15px;">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.topic.label }}
+                    </label>
+                    {{ form.topic }}
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ form.collection.label }}
+                        </label>
+                        {{ form.collection }}
+                        <p class="text-xs text-gray-400 mt-1">{{ form.collection.help_text }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ form.num_cards.label }}
+                        </label>
+                        {{ form.num_cards }}
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit"
+                            class="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold">
+                        ✨ Gerar Flashcards
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Flashcards Gerados -->
+        {% if flashcards %}
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Flashcards Gerados</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {% for card in flashcards %}
+            <div class="card shadow p-5 text-left hover-card" style="border-radius: 12px;">
+                <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-2">{{ card.title }}</h3>
+                <p class="text-gray-600 dark:text-gray-300">{{ card.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .hover-card { transition: transform 0.15s ease-in-out; }
+    .hover-card:hover { transform: translateY(-2px); }
+    .card { border-radius: 15px; border: none; }
+</style>
+{% endblock %}

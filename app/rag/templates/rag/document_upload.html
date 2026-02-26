@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pt-8 text-center px-2 md:px-4 lg:px-8 pb-16">
+    <div class="max-w-xl mx-auto">
+        <h1 class="mb-2 text-3xl font-extrabold text-gray-900 dark:text-white">
+            📄 Enviar Material
+        </h1>
+        <p class="text-gray-600 dark:text-gray-300 mb-8">
+            Envie seus materiais de estudo para gerar flashcards mais inteligentes
+        </p>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 text-left">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Título do Documento
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Sessão de Estudo
+                    </label>
+                    {{ form.collection }}
+                    {% if form.collection.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.collection.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-xs text-gray-400 mt-1">
+                        Não tem coleção? <a href="{% url 'rag:collection_create' %}" class="text-orange-500 hover:underline">Crie uma aqui</a>.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Arquivo
+                    </label>
+                    {{ form.file }}
+                    {% if form.file.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.file.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-xs text-gray-500 mt-2">Formatos aceitos: PDF, TXT, Markdown — até 10MB</p>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="flex gap-3 justify-center mt-6">
+                    <button type="submit"
+                            class="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold">
+                        🚀 Processar Documento
+                    </button>
+                    <a href="{% url 'flashcards:home_flashcards' %}"
+                       class="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Box -->
+        <div class="mt-8 max-w-xl mx-auto text-left bg-orange-50 dark:bg-orange-900/20 p-5 rounded-xl border border-orange-100 dark:border-orange-800/30">
+            <h3 class="font-bold text-orange-800 dark:text-orange-300 mb-2">Como funciona?</h3>
+            <ol class="text-sm text-orange-700 dark:text-orange-400 space-y-1 list-decimal list-inside">
+                <li>Seu documento e carregado e o texto e extraido automaticamente</li>
+                <li>O conteudo e analisado e indexado pela IA</li>
+                <li>Ao errar um flashcard, a IA busca passagens relevantes do seu material e gera explicacoes personalizadas</li>
+                <li>Voce tambem pode conversar com a IA sobre o conteudo na sessao de estudos</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

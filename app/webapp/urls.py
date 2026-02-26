@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from django.conf.urls.static import static
 from theme.views import change_mode
 
 urlpatterns = [
@@ -25,5 +26,10 @@ urlpatterns = [
     path('', include('home.urls')),  
     path('user/', include('user.urls')),
     path('flashcards/', include('flashcards.urls')),
+    path('study/', include('rag.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
+
+# Servir media files em desenvolvimento
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
