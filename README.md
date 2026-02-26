@@ -42,8 +42,11 @@ O **FlashLearn** é uma plataforma web de estudo que utiliza **Inteligência Art
 - **IA Contextual**: gera flashcards diretamente a partir dos documentos de uma coleção
 - **Chat de estudo**: converse com a IA sobre o conteúdo da coleção
 
-### Gestão e Revisão
-- **Repetição Espaçada**: acompanhe o desempenho por sessão com resumo de acertos/erros
+### Chat com Agente IA (LangGraph)
+- **Chat de estudo** com agente ReAct (LangGraph) integrado ao Gemini
+- Ferramentas do agente: busca nos materiais (`search_docs`), busca na internet (`search_web`), listagem e criação de flashcards, resumo de progresso
+- **Busca na internet** via Tavily (recomendado) com fallback automático para DuckDuckGo (gratuito, sem chave)
+- Contexto injetado por sessão de forma thread-safe: acompanhe o desempenho por sessão com resumo de acertos/erros
 - Listagem de flashcards agrupados por coleção
 - Exclusão individual de flashcards
 
@@ -67,7 +70,8 @@ FlashLearn/
 │   │   ├── services/
 │   │   │   ├── ingestion.py   # Upload → Chunk → Embed → ChromaDB
 │   │   │   ├── retriever.py   # Busca semântica com filtros
-│   │   │   └── chains.py      # Chains LCEL (explicações, corretivos, chat)
+│   │   │   ├── chains.py      # Chains LCEL (explicações, corretivos)
+│   │   │   └── chat_agent.py  # Agente LangGraph (ReAct) + 5 ferramentas
 │   │   ├── views.py     #   Coleções, documentos, estudo, revisão, chat
 │   │   └── templates/rag/    #   9 templates com Tailwind CSS
 │   ├── theme/           # Configuração Tailwind CSS + dark/light mode
@@ -109,10 +113,13 @@ Documento → Loader (PDF/TXT/MD) → Chunking (800 chars, 200 overlap)
 - **django-browser-reload**: Hot reload em desenvolvimento
 
 ### **IA e RAG**
-- **Google Gemini API** (`google-genai`): LLM para geração de flashcards e explicações (`gemini-2.0-flash` / `gemini-2.5-flash-lite`)
+- **Google Gemini API** (`google-genai`): LLM para geração de flashcards e explicações (`gemini-2.5-flash-lite`)
 - **LangChain**: Orquestração de chains, loaders e text splitters
+- **LangGraph**: Agente ReAct (`create_react_agent`) com 5 ferramentas para o chat de estudos
 - **LangChain Google GenAI**: Integração LangChain ↔ Gemini (embeddings + chat)
 - **ChromaDB**: Banco de dados vetorial para busca semântica
+- **Tavily**: Motor de busca na internet para o agente (plano gratuito disponível)
+- **DuckDuckGo**: Fallback gratuito de busca web (sem chave de API necessária)
 - **Unstructured**: Parsing de documentos (PDF, Markdown)
 
 ### **Infraestrutura**
@@ -127,6 +134,7 @@ Documento → Loader (PDF/TXT/MD) → Chunking (800 chars, 200 overlap)
 - **Python:** 3.11 ou superior
 - **Node.js:** 18+ (para Tailwind CSS)
 - **Chave de API:** Google Gemini API Key ([obter aqui](https://aistudio.google.com/apikey))
+- **Chave de API (opcional):** Tavily API Key ([obter aqui](https://app.tavily.com) — plano gratuito disponível) para busca web no agente
 - **Espaço em disco:** ~500 MB para dependências + ChromaDB
 
 ---
@@ -152,11 +160,12 @@ Documento → Loader (PDF/TXT/MD) → Chunking (800 chars, 200 overlap)
    pip install -r requirements.txt
    ```
 
-4. **Configure a chave de API:**
+4. **Configure as chaves de API:**
+   Crie o arquivo `app/.env`:
    ```env
    GOOGLE_API_KEY=sua_chave_aqui
+   TAVILY_API_KEY=sua_chave_aqui   # opcional — habilita busca web no agente
    ```
-   Crie o arquivo `app/.env` com o conteúdo acima.
 
 5. **Instale as dependências do Tailwind CSS:**
    ```bash
@@ -207,8 +216,10 @@ docker run -p 8000:8000 --env GOOGLE_API_KEY=sua_chave flashlearn
 
    | Variável | Padrão | Descrição |
    |----------|--------|-----------|
+   | `GOOGLE_API_KEY` | — | **Obrigatória.** Chave da API Google Gemini |
+   | `TAVILY_API_KEY` | — | Opcional. Busca web no agente (fallback: DuckDuckGo) |
    | `RAG_LLM_MODEL` | `gemini-2.5-flash-lite` | Modelo LLM para geração de texto |
-   | `RAG_EMBEDDING_MODEL` | `models/text-embedding-004` | Modelo de embeddings |
+   | `RAG_EMBEDDING_MODEL` | `models/gemini-embedding-001` | Modelo de embeddings |
    | `RAG_CHUNK_SIZE` | `800` | Tamanho dos chunks de texto |
    | `RAG_CHUNK_OVERLAP` | `200` | Overlap entre chunks |
    | `RAG_CHROMA_COLLECTION` | `flashlearn_docs` | Nome da coleção ChromaDB |
@@ -224,10 +235,14 @@ docker run -p 8000:8000 --env GOOGLE_API_KEY=sua_chave flashlearn
 4. Opcionalmente, selecione ou crie uma **sessão de estudo** no dropdown (ou deixe em branco)
 5. Clique em **Gerar Flashcards** e edite o resultado
 
-### 2. Chatbot de Estudos (IA Contextual)
+### 2. Chat com Agente IA
 1. Na home, clique em **Estudar com IA** (ou acesse `/study/chat/`)
-2. Selecione uma sessão para que a IA use seus materiais como contexto
-3. Faça perguntas livremente — a IA responde com base nos seus documentos
+2. Selecione uma sessão para que a IA use seus materiais como contexto (opcional)
+3. Faça perguntas livremente — o agente:
+   - Primeiro busca nos seus documentos (`search_docs`)
+   - Se não encontrar, busca na internet (`search_web`)
+   - Pode criar flashcards durante a conversa e consultar seu progresso
+4. O agente cita as fontes utilizadas na resposta
 
 ### 3. Estudo com Modo Estudo (flip cards + RAG)
 1. Na sessão de estudo (`/study/collections/<id>/`), abra a aba **Estudar**
@@ -254,13 +269,15 @@ docker run -p 8000:8000 --env GOOGLE_API_KEY=sua_chave flashlearn
 ### ✅ Implementado
 - Autenticação e registro de usuários
 - Geração de flashcards via upload de arquivo com Google Gemini
+- Tipos de card: padrão, cloze, reverso e múltipla escolha
 - Edição inline com auto-save (AJAX) e download em PDF
 - Pipeline RAG completo: ingestão, embeddings, ChromaDB, busca semântica
-- Coleções para organizar materiais de estudo
+- Sessões (coleções) para organizar materiais de estudo
 - Modo Estudo interativo (flip cards + avaliação de confiança)
-- Revisão com RAG: explicações + flashcards corretivos
-- Chat de estudo contextualizado por coleção
-- Repetição espaçada com resumo por sessão
+- Revisão com RAG: explicações contextualizadas + flashcards corretivos
+- **Agente LangGraph (ReAct)** com 5 ferramentas: busca em documentos, busca na internet, flashcards, progresso
+- **Busca na internet** no agente via Tavily (com fallback DuckDuckGo gratuito)
+- Repetição espaçada com resumo de acertos/erros por sessão
 - Dark mode / Light mode
 - Containerização com Docker
 
