@@ -3,19 +3,16 @@
 <div class="pt-8 px-2 md:px-4 lg:px-8 pb-16">
     <div class="max-w-6xl mx-auto">
 
-        <!-- Header -->
-        <div class="text-center mb-6">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
-                 {{ collection.name }}
-            </h1>
-            {% if collection.description %}
-            <p class="mt-2 text-gray-500 dark:text-gray-400">{{ collection.description }}</p>
-            {% endif %}
-            <div class="flex gap-6 justify-center mt-3 text-sm text-gray-400 dark:text-gray-500">
-                <span> {{ collection.document_count }} material{{ collection.document_count|pluralize:"is" }}</span>
-                <span> {{ flashcard_count }} flashcard{{ flashcard_count|pluralize:"s" }}</span>
-
+        <!-- Nome da coleção + breadcrumb -->
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ collection.name }}</h1>
+                <div class="flex gap-4 mt-1 text-xs text-gray-400 dark:text-gray-500">
+                    <span>{{ collection.document_count }} material{{ collection.document_count|pluralize:"is" }}</span>
+                    <span>{{ flashcard_count }} flashcard{{ flashcard_count|pluralize:"s" }}</span>
+                </div>
             </div>
+            <a href="{% url 'flashcards:home_flashcards' %}" class="text-sm text-orange-500 hover:text-orange-600 font-medium">← Início</a>
         </div>
 
         <!-- Tabs -->
@@ -23,11 +20,11 @@
             <nav class="-mb-px flex gap-1 overflow-x-auto" id="tabs">
                 <button onclick="showTab('flashcards')" id="tab-flashcards"
                     class="tab-btn shrink-0 px-5 py-3 text-sm font-semibold border-b-2 border-orange-500 text-orange-600 dark:text-orange-400 transition-colors">
-                     Flashcards
+                     Flashcards {% if flashcard_count > 0 %}<span class="ml-1 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded-full">{{ flashcard_count }}</span>{% endif %}
                 </button>
                 <button onclick="showTab('materiais')" id="tab-materiais"
                     class="tab-btn shrink-0 px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                     Materiais
+                     Materiais {% if collection.document_count > 0 %}<span class="ml-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 px-1.5 py-0.5 rounded-full">{{ collection.document_count }}</span>{% endif %}
                 </button>
                 <button onclick="showTab('estudar')" id="tab-estudar"
                     class="tab-btn shrink-0 px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
@@ -63,7 +60,6 @@
                 <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
                     <div class="flex justify-between items-start gap-2">
                         <div class="flex-1 min-w-0">
-                            <p class="text-xs font-medium text-orange-500 uppercase mb-1">{{ card.get_card_type_display }}</p>
                             <h4 class="font-semibold text-gray-900 dark:text-white text-sm leading-snug mb-2 line-clamp-2">{{ card.title }}</h4>
                             <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">{{ card.content }}</p>
                         </div>
@@ -155,7 +151,7 @@
 
         <!-- Rodapé -->
         <div class="flex items-center justify-between mt-10 pt-6 border-t border-gray-100 dark:border-gray-700">
-            <a href="{% url 'flashcards:home_flashcards' %}" class="text-sm text-orange-500 hover:text-orange-600 font-medium"> Início</a>
+            <a href="{% url 'flashcards:home_flashcards' %}" class="text-sm text-orange-500 hover:text-orange-600 font-medium">← Início</a>
             <a href="{% url 'rag:collection_delete' collection.pk %}" class="text-sm text-red-400 hover:text-red-500 transition-colors">Excluir Sessão</a>
         </div>
     </div>
