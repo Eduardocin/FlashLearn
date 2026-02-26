@@ -32,7 +32,8 @@ INSTALLED_APPS = [
     'user',
     'home',
     'flashcards',
-    'gpt',
+    'ai',
+    'rag',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -157,4 +158,16 @@ NPM_BIN_PATH = os.environ.get("NPM_BIN_PATH", "/usr/bin/npm")
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = "tailwind"
+
+# ─── Media files (uploads de documentos) ─────────────────────────────────
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ─── RAG Settings ────────────────────────────────────────────────────────
+CHROMA_PERSIST_DIR = os.path.join(BASE_DIR, 'chroma_db')
+RAG_CHUNK_SIZE = 800
+RAG_CHUNK_OVERLAP = 200
+RAG_EMBEDDING_MODEL = 'models/gemini-embedding-001'
+RAG_CHROMA_COLLECTION = 'flashlearn_docs'
+RAG_LLM_MODEL = os.environ.get('RAG_LLM_MODEL', 'gemini-2.5-flash-lite')
 

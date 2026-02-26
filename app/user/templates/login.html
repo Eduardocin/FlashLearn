@@ -1,21 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="bg-gray-50 dark:bg-gray-900">
-    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto min-h-screen lg:py-0">
-        <a href="{% url 'home' %}" class="flex items-center mb-6 text-4xl font-semibold text-orange-500 dark:text-white">
-            FlashLearn                
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto min-h-[80vh] lg:py-0">
+        <a href="{% url 'home' %}" class="flex items-center mb-8 text-3xl font-bold">
+            <span class="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">FlashLearn</span>
         </a>
-        <div class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-                <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                    Faça login na conta
-                </h1>
-                <form method="post" class="space-y-4 md:space-y-6" action="">
+        <div class="w-full bg-white rounded-2xl shadow-xl dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-8 space-y-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        Bem-vindo de volta
+                    </h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Faça login para continuar estudando</p>
+                </div>
+                <form method="post" class="space-y-5" action="">
                     {% csrf_token %}                    
                     {% if messages %}
                     <div class="mb-4">
                         {% for message in messages %}
-                            <div class="p-3 text-sm {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} rounded-lg">
+                            <div class="p-3 text-sm {% if message.tags == 'error' %}bg-red-50 text-red-600 border border-red-200{% else %}bg-green-50 text-green-600 border border-green-200{% endif %} rounded-lg">
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -23,32 +26,34 @@
                     {% endif %}
                     
                     <div>
-                        <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Usuário</label>
-                        <input type="text" name="username" id="username" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Digite seu nome de usuário" required="">
+                        <label for="username" class="block mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">Usuário</label>
+                        <input type="text" name="username" id="username" 
+                               class="w-full px-4 py-2.5 border border-gray-300 text-gray-900 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500 transition-colors" 
+                               placeholder="Digite seu nome de usuário" required="">
                     </div>
                     <div>
-                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Senha</label>
-                        <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
+                        <label for="password" class="block mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                        <input type="password" name="password" id="password" placeholder="••••••••" 
+                               class="w-full px-4 py-2.5 border border-gray-300 text-gray-900 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500 transition-colors" 
+                               required="">
                     </div>
                     <div class="flex items-center justify-between">
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                              <input id="remember" aria-describedby="remember" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800">
-                            </div>
-                            <div class="ml-3 text-sm">
-                              <label for="remember" class="text-gray-500 dark:text-gray-300">Lembre-me</label>
-                            </div>
-                        </div>
-                        <a href="#" class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">Esqueceu sua senha?</a>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input id="remember" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-400">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Lembre-me</span>
+                        </label>
+                        <a href="#" class="text-sm font-medium text-orange-500 hover:text-orange-600 hover:underline">Esqueceu sua senha?</a>
                     </div>
-                    <button type="submit" class="w-full text-white bg-orange-500 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login</button>
-                    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                        Não tem uma conta? <a href="{% url 'register' %}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Registre-se</a>
+                    <button type="submit" 
+                            class="w-full py-2.5 text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-semibold rounded-xl transition-colors">
+                        Login
+                    </button>
+                    <p class="text-sm text-center text-gray-500 dark:text-gray-400">
+                        Não tem uma conta? <a href="{% url 'register' %}" class="font-semibold text-orange-500 hover:text-orange-600 hover:underline">Registre-se</a>
                     </p>
                 </form>
             </div>
         </div>
     </div>
-  </section>
-</body>
+</section>
 {% endblock %}

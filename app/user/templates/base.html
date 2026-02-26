@@ -13,9 +13,16 @@
                 extend: {
                     colors: {
                         primary: {
+                            50:  '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
                             500: '#f97316', 
                             600: '#ea580c', 
                             700: '#c2410c', 
+                            800: '#9a3412',
+                            900: '#7c2d12',
                         }
                     },
                 },
@@ -25,119 +32,151 @@
     {% load static %}
 </head>
 
-<body class="dark:bg-gray-700/100 flex flex-col min-h-screen">
-  <nav class="fixed sticky top-0 inset-x-0 w-full bg-white shadow-md py-3 px-6 flex justify-between items-center z-50 dark:bg-gray-700/100">
-        
-        
-        <div class="flex items-center">
+<body class="dark:bg-gray-900 bg-gray-50 flex flex-col min-h-screen text-gray-800 dark:text-gray-200">
+  <!-- ═══ NAVBAR ═══ -->
+  <nav class="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
           {% if user.is_authenticated %}
-              <a href="{% url 'flashcards:home_flashcards' %}" class="text-xl font-bold text-orange-600 hover:text-red-500">FlashLearn</a>
+            <a href="{% url 'flashcards:home_flashcards' %}" class="flex items-center gap-2 group">
+              <img src="{% static 'images/Logo.jpeg' %}" alt="FlashLearn" class="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
+              <span class="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">FlashLearn</span>
+            </a>
           {% else %}
-              <a href="{% url 'home' %}" class="text-xl font-bold text-orange-600 hover:text-red-500">FlashLearn</a>
+            <a href="{% url 'home' %}" class="flex items-center gap-2 group">
+              <img src="{% static 'images/Logo.jpeg' %}" alt="FlashLearn" class="h-9 w-9 rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
+              <span class="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">FlashLearn</span>
+            </a>
           {% endif %}
-          
-          <!-- Logo ao lado do texto FlashLearn -->
-          <img src="{% static 'images/Logo.jpeg' %}" alt="FlashLearn Logo" class="h-8 ml-2">
         </div>
-        <!-- Logout Button -->
-        <div>
-            {% if user.is_authenticated %}
-                <!-- Exibe o nome do usuário e o botão de logout -->
-                <span class="welcome-message">Olá, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}" class="inline-block px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Sair</a>
-            {% else %}
-            <div class="space-x-4">
-                <a href="{% url 'login' %}" class="inline-block px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">Login</a>
-                <a href="{% url 'register' %}" class="inline-block px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Registrar</a>
-            </div>
-            {% endif %}
-        </div>
-    </nav>
 
-    <!-- Dark mode toggle button -->
-    <div class="fixed bottom-4 right-4 z-50">
-      <button id="darkModeToggle" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-          </svg>
-      </button>
+        <!-- Nav Links (autenticado) -->
+        {% if user.is_authenticated %}
+        <div class="hidden md:flex items-center gap-1">
+          <a href="{% url 'flashcards:my_flashcards' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">
+            Meus Flashcards
+          </a>
+          <a href="{% url 'flashcards:create_flashcards' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">
+            Criar Flashcards
+          </a>
+          <a href="{% url 'rag:study_chat' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">
+            Estudar
+          </a>
+        </div>
+        {% endif %}
+
+        <!-- Right side -->
+        <div class="flex items-center gap-3">
+          {% if user.is_authenticated %}
+            <div class="flex items-center gap-3">
+              <span class="hidden sm:inline text-sm text-gray-500 dark:text-gray-400">
+                Olá, <span class="font-semibold text-gray-700 dark:text-gray-200">{{ user.username }}</span>
+              </span>
+              <a href="{% url 'logout' %}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Sair
+              </a>
+            </div>
+          {% else %}
+            <div class="flex items-center gap-2">
+              <a href="{% url 'login' %}" class="px-5 py-2 text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors">Login</a>
+              <a href="{% url 'register' %}" class="px-5 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 shadow-sm hover:shadow-md transition-all">Registrar</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Mobile nav (autenticado) -->
+      {% if user.is_authenticated %}
+      <div class="md:hidden flex gap-1 pb-2 overflow-x-auto -mx-1 scrollbar-hide">
+        <a href="{% url 'flashcards:my_flashcards' %}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">Meus Flashcards</a>
+        <a href="{% url 'flashcards:create_flashcards' %}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">Criar Flashcards</a>
+        <a href="{% url 'rag:study_chat' %}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors">Estudar</a>
+      </div>
+      {% endif %}
     </div>
+  </nav>
+
+  <!-- ═══ DARK MODE TOGGLE ═══ -->
+  <div class="fixed bottom-5 right-5 z-50">
+    <button id="darkModeToggle" 
+            class="group p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:scale-110">
+      <!-- Sun icon (visible in dark mode) -->
+      <svg class="w-5 h-5 hidden dark:block text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+      </svg>
+      <!-- Moon icon (visible in light mode) -->
+      <svg class="w-5 h-5 block dark:hidden text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+      </svg>
+    </button>
+  </div>
     
-    <script>
-      // Dark mode toggle functionality
-      const darkModeToggle = document.getElementById('darkModeToggle');
-      const html = document.documentElement;
-  
-      // Verifica se há preferência salva
-      const darkModeSaved = localStorage.getItem('darkMode') === 'true';
-      if (darkModeSaved) {
-          html.classList.add('dark');
-      }
-  
-      darkModeToggle.addEventListener('click', () => {
-          html.classList.toggle('dark');
-          // Salva a preferência no localStorage
-          localStorage.setItem('darkMode', html.classList.contains('dark'));
-      });
-    </script>
-    <!-- Conteúdo principal com flex-grow para ocupar espaço disponível -->
-    <main class="flex-grow">
-      {% block content %}{% endblock %}
-    </main>
-    <footer class="mt-auto">
-      <footer class="mt-auto">
-        <div class="py-4 bg-orange-600 text-white">
-            <div class="container px-4 mx-auto">
-              <div class="-mx-4 flex flex-wrap justify-between">
-                <div class="px-4 my-4 w-full xl:w-1/5">
-                  <a href="/" class="block mb-6 text-3xl font-semibold">Flashlearn</a> 
-                  <p class="text-sm md:text-base">
-                    O FlashLearn é uma plataforma que cria flashcards personalizados a partir de textos usando IA para facilitar o aprendizado.
-                  </p>
-                </div>
-                <div class="px-4 my-4 w-full sm:w-auto">
-                  <div>
-                    <h2 class="inline-block text-xl pb-3 mb-3 border-b-2 border-white">Empresa</h2>
-                  </div>
-                  <ul class="leading-7">
-                    <li><a href="{% url 'about_us' %}" class="hover:text-blue-200 transition-colors">Sobre Nós</a></li>                  </ul>
-                </div>
-                
-                <div class="px-4 my-4 w-full sm:w-auto xl:w-1/5">
-                  <div>
-                    <h2 class="inline-block text-xl pb-3 mb-3 border-b-2 border-white">Redes Sociais</h2>
-                  </div>
-                  <div class="flex space-x-3">
-                    <!-- Botões de redes sociais simplificados -->
-                    <a href="#" class="p-2 border border-white rounded-full hover:bg-white hover:text-orange-600 transition-colors" aria-label="Facebook">
-                      <svg class="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                        <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"></path>
-                      </svg>
-                    </a>
-                    <a href="#" class="p-2 border border-white rounded-full hover:bg-white hover:text-orange-600 transition-colors" aria-label="Twitter">
-                      <svg class="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"></path>
-                      </svg>
-                    </a>
-                    <a href="#" class="p-2 border border-white rounded-full hover:bg-white hover:text-orange-600 transition-colors" aria-label="Instagram">
-                      <svg class="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"></path>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
+  <script>
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const html = document.documentElement;
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      html.classList.add('dark');
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('darkMode', html.classList.contains('dark'));
+    });
+  </script>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="flex-grow">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="mt-auto bg-gray-900 text-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Brand -->
+        <div>
+          <a href="/" class="text-2xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+            FlashLearn
+          </a>
+          <p class="mt-3 text-sm text-gray-400 leading-relaxed">
+            Plataforma que cria flashcards personalizados a partir de textos usando IA para facilitar o aprendizado.
+          </p>
+        </div>
+        
+        <!-- Links -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">Empresa</h3>
+          <ul class="space-y-2">
+            <li><a href="{% url 'about_us' %}" class="text-sm text-gray-400 hover:text-orange-400 transition-colors">Sobre Nós</a></li>
+          </ul>
+        </div>
+
+        <!-- Social -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">Redes Sociais</h3>
+          <div class="flex gap-3">
+            <a href="#" class="p-2 rounded-lg bg-gray-800 hover:bg-orange-500 text-gray-400 hover:text-white transition-all duration-200" aria-label="Facebook">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 320 512"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>
+            </a>
+            <a href="#" class="p-2 rounded-lg bg-gray-800 hover:bg-orange-500 text-gray-400 hover:text-white transition-all duration-200" aria-label="Twitter">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+            </a>
+            <a href="#" class="p-2 rounded-lg bg-gray-800 hover:bg-orange-500 text-gray-400 hover:text-white transition-all duration-200" aria-label="Instagram">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 448 512"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+            </a>
           </div>
-          <div class="bg-orange-700 py-3 text-gray-100">
-            <div class="container mx-auto px-4">
-              <div class="-mx-4 flex flex-wrap justify-between">
-                <div class="px-4 w-full text-center sm:w-auto sm:text-left">
-                  &copy; {% now "Y" %} FlashLearn. Todos os direitos reservados.
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </body>
-      </html>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <p class="text-center text-xs text-gray-500">&copy; {% now "Y" %} FlashLearn. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

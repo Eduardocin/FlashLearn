@@ -1,86 +1,127 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<div class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Efeito de fundo dinâmico -->
+
+<!-- Hero Section -->
+<div class="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+    <!-- Background -->
     <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent dark:from-orange-800/20"></div>
-        <div class="absolute inset-0 animate-pulse-slow bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImIiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIuNSIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjxmZUNvbG9yTWF0cml4IHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgLjUgMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNiKSIgb3BhY2l0eT0iLjEiLz48L3N2Zz4=')]"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800"></div>
+        <div class="absolute top-20 left-10 w-72 h-72 bg-orange-200 dark:bg-orange-500/10 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-40 animate-blob"></div>
+        <div class="absolute top-40 right-10 w-72 h-72 bg-amber-200 dark:bg-amber-500/10 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-orange-300 dark:bg-orange-600/10 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
     </div>
 
-    <!-- Conteúdo principal -->
-    <div class="relative z-10 text-center space-y-8 px-4">
-        <!-- Logo e título -->
-        <div class="flex items-center justify-center gap-4">
-            <img src="{% static 'images/Logo.jpeg' %}" alt="FlashLearn Logo" class="h-20 animate-float">
-            <h1 class="text-7xl md:text-9xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 animate-text-glow">
-                FlashLearn
-            </h1>
+    <!-- Content -->
+    <div class="relative z-10 text-center space-y-8 px-4 max-w-4xl mx-auto">
+        <div class="flex items-center justify-center gap-4 mb-2">
+            <img src="{% static 'images/Logo.jpeg' %}" alt="FlashLearn Logo" class="h-16 w-16 rounded-2xl shadow-lg animate-float">
         </div>
-
-        <!-- Subtítulo animado -->
-        <p class="text-xl md:text-2xl font-medium text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-slide-up">
-            Transforme seu aprendizado com flashcards inteligentes gerados por IA
-            <span class="inline-block ml-2">🚀</span>
-        </p>
         
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight">
+            <span class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent">FlashLearn</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Transforme qualquer material de estudo em flashcards inteligentes com IA.
+            Estude de forma mais eficiente e personalizada.
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <a href="{% url 'register' %}" 
+               class="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-orange-500 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                Começar Gratuitamente
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+            <a href="{% url 'login' %}" 
+               class="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+                Já tenho conta
+            </a>
+        </div>
     </div>
 </div>
 
-<style>
-    @keyframes text-glow {
-        0%, 100% { text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
-        50% { text-shadow: 0 0 30px rgba(249, 115, 22, 0.8); }
-    }
+<!-- Features Section -->
+<section class="py-20 px-4 bg-white dark:bg-gray-800/50">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+                Como o FlashLearn <span class="text-orange-500">funciona</span>
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+                Três passos simples para revolucionar seus estudos
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="group relative bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                    <span class="text-2xl">📄</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Envie seu material</h3>
+                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Faça upload de PDFs, documentos ou textos. A IA analisa e extrai os conceitos mais importantes.
+                </p>
+            </div>
 
+            <!-- Feature 2 -->
+            <div class="group relative bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                    <span class="text-2xl">✨</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">IA gera flashcards</h3>
+                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Flashcards personalizados são criados automaticamente com perguntas e respostas relevantes.
+                </p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="group relative bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                    <span class="text-2xl">🎯</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Estude e revise</h3>
+                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Revise com modo estudo interativo. Quando errar, a IA explica usando seus próprios materiais.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Final -->
+<section class="py-16 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">
+            Pronto para estudar de forma mais inteligente?
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">
+            Junte-se ao FlashLearn e comece a criar flashcards com IA hoje mesmo.
+        </p>
+        <a href="{% url 'register' %}" 
+           class="inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-orange-500 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/25 hover:shadow-xl transition-all duration-300">
+            Criar Conta Grátis
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+    </div>
+</section>
+
+<style>
     @keyframes float {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-20px); }
+        50% { transform: translateY(-12px); }
     }
-
-    @keyframes pulse-slow {
-        0%, 100% { opacity: 0.05; }
-        50% { opacity: 0.1; }
+    @keyframes blob {
+        0%   { transform: translate(0, 0) scale(1); }
+        33%  { transform: translate(30px, -50px) scale(1.1); }
+        66%  { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0, 0) scale(1); }
     }
-
-    @keyframes bounce-horizontal {
-        0%, 100% { transform: translateX(0); }
-        50% { transform: translateX(8px); }
-    }
-
-    @keyframes slide-up {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    
-    .animate-text-glow {
-        animation: text-glow 6s ease-in-out infinite;
-    }
-
-    .animate-float {
-        animation: float 4s ease-in-out infinite;
-    }
-
-    .animate-pulse-slow {
-        animation: pulse-slow 6s ease-in-out infinite;
-    }
-
-    .animate-bounce-horizontal {
-        animation: bounce-horizontal 1.5s ease-in-out infinite;
-    }
-
-    .animate-slide-up {
-        animation: slide-up 0.8s ease-out forwards;
-        opacity: 0;
-    }
-
-    .delay-300 {
-        animation-delay: 300ms;
-    }
-
-    .shadow-orange-500/30 {
-        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
-    }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .animate-blob { animation: blob 7s infinite; }
+    .animation-delay-2000 { animation-delay: 2s; }
+    .animation-delay-4000 { animation-delay: 4s; }
 </style>
 {% endblock %}

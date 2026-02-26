@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pt-6 px-4 pb-16">
+    <div class="max-w-3xl mx-auto flex flex-col" style="height: calc(100vh - 160px);">
+
+        <!-- Cabeçalho -->
+        <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
+            <div>
+                <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">
+                    🤖 Assistente de <span class="text-orange-500">Estudos</span>
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    Tire dúvidas com base nos seus materiais de estudo
+                </p>
+            </div>
+
+            <!-- Seletor de coleção -->
+            {% if collections %}
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    Sessão:
+                </label>
+                <select id="collection-select"
+                        class="text-sm px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
+                    <option value="">Todos os materiais</option>
+                    {% for col in collections %}
+                    <option value="{{ col.id }}" {% if selected_id == col.id|stringformat:"s" %}selected{% endif %}>
+                        {{ col.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Janela do chat -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col overflow-hidden">
+            <!-- Mensagens -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                <!-- Mensagem inicial -->
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-base shrink-0">🤖</div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%]">
+                        <p class="text-sm text-gray-700 dark:text-gray-200">
+                            Olá! Sou seu assistente de estudos do FlashLearn.
+                            {% if collections %}
+                            Selecione uma sessão acima para que eu busque contexto dos seus materiais, ou me faça qualquer pergunta!
+                            {% else %}
+                            Ainda não há sessões com materiais, mas posso responder dúvidas gerais. Como posso ajudar?
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+                <form id="chat-form" onsubmit="sendMessage(event)" class="flex gap-2">
+                    <input id="chat-input" type="text"
+                           placeholder="Faça uma pergunta sobre seus estudos..."
+                           autocomplete="off"
+                           class="flex-1 px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+                    <button type="submit" id="send-btn"
+                            class="px-4 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        ➤
+                    </button>
+                </form>
+                <p class="text-xs text-gray-400 mt-2 text-center">
+                    As respostas são geradas com base nos seus materiais enviados.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+const chatUrl = '{% url "rag:study_chat" %}';
+
+function getCollectionId() {
+    const sel = document.getElementById('collection-select');
+    return sel ? sel.value : '';
+}
+
+function appendMessage(role, text) {
+    const container = document.getElementById('chat-messages');
+    const isUser = role === 'user';
+    const div = document.createElement('div');
+    div.className = `flex gap-2 ${isUser ? 'justify-end' : ''}`;
+    const safeText = text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    div.innerHTML = isUser
+        ? `<div class="bg-orange-500 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%] text-sm">${safeText}</div>`
+        : `<div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-base shrink-0">🤖</div>
+           <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%] text-sm text-gray-700 dark:text-gray-200">${safeText}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendTyping() {
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.id = 'typing';
+    div.className = 'flex gap-2';
+    div.innerHTML = `<div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-base shrink-0">🤖</div>
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-gray-400">
+            <span class="inline-flex gap-1 items-center">
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+            </span>
+        </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+const TOOL_LABELS = {
+    'search_docs':       { icon: '🔍', label: 'Buscou materiais' },
+    'get_my_flashcards': { icon: '📇', label: 'Consultou flashcards' },
+    'create_flashcard':  { icon: '✨', label: 'Criou flashcard' },
+    'get_study_summary': { icon: '📊', label: 'Resumo de progresso' },
+};
+
+function appendToolBadges(tools) {
+    if (!tools || tools.length === 0) return;
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'flex gap-1.5 flex-wrap pl-10 pb-1';
+    tools.forEach(t => {
+        const info = TOOL_LABELS[t] || { icon: '⚙️', label: t };
+        const badge = document.createElement('span');
+        badge.className = 'text-xs px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-800';
+        badge.textContent = `${info.icon} ${info.label}`;
+        div.appendChild(badge);
+    });
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function sendMessage(event) {
+    event.preventDefault();
+    const input = document.getElementById('chat-input');
+    const btn = document.getElementById('send-btn');
+    const message = input.value.trim();
+    if (!message) return;
+
+    appendMessage('user', message);
+    input.value = '';
+    btn.disabled = true;
+    appendTyping();
+
+    const fd = new FormData();
+    fd.append('message', message);
+    const colId = getCollectionId();
+    if (colId) fd.append('collection_id', colId);
+
+    fetch(chatUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        body: fd
+    })
+    .then(r => r.json())
+    .then(data => {
+        const t = document.getElementById('typing');
+        if (t) t.remove();
+        if (data.error) {
+            appendMessage('bot', data.error);
+        } else {
+            appendMessage('bot', data.answer || 'Não foi possível gerar resposta.');
+            appendToolBadges(data.tools_used);
+        }
+    })
+    .catch(() => {
+        const t = document.getElementById('typing');
+        if (t) t.remove();
+        appendMessage('bot', 'Erro de conexão. Tente novamente.');
+    })
+    .finally(() => { btn.disabled = false; });
+}
+</script>
+{% endblock %}

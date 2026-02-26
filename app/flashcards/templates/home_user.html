@@ -2,106 +2,66 @@
 {% load static %}
 {% block content %}
 
-<div class="pt-8 text-center justify-content-center px-2 md:px-4 lg:px-8">
-    <!-- Cabeçalho -->
-    <div class="row gx-4 gx-lg-5 justify-content-center mb-12">
-        <div class="col-lg-10">
-            <h1
-                class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-                Bem-vindo, <span class="text-orange-500">{{user.username}}</span>!
+<div class="py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Cabeçalho -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white">
+                Bem-vindo, <span class="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">{{user.username}}</span>!
             </h1>
-            <p class="text-xl text-gray-600 dark:text-gray-300">O que vamos aprender hoje?</p>
+            <p class="mt-3 text-lg text-gray-500 dark:text-gray-400">O que vamos aprender hoje?</p>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
-        <!-- Card Meus Flashcards -->
-        <div class="rounded-md col-md-6 mb-5 py-10">
-            <div class="card shadow-lg hover-card h-full">
-                <div class="card-body py-8">
-                    <div class="icon-stack bg-primary text-white mb-4">
-                        <i class="fas fa-layer-group fa-2x"></i>
-                    </div>
-                    <h3 class="mb-2 text-5xl font-bold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
-                        Meus Flashcards</h3>
-                    <p class="card-text text-muted mb-6 text-gray-600 dark:text-gray-300">
-                            Revise e gerencie sua coleção atual
-                    </p>
-                    <a href="{% url 'flashcards:my_flashcards' %}"
-                        class="btn-pulse inline-block px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                        Acessar Coleção 
-                    </a>
+        <!-- Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <!-- Card Meus Flashcards -->
+            <div class="group relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                    <span class="text-2xl">📚</span>
                 </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Meus Flashcards</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+                    Veja sua coleção, acompanhe revisões e a repetição espaçada por sessão
+                </p>
+                <a href="{% url 'flashcards:my_flashcards' %}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 shadow-sm hover:shadow-md transition-all">
+                    Ver coleção
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            <!-- Card Criar Flashcards -->
+            <div class="group relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                    <span class="text-2xl">✨</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Criar Flashcards</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+                    Envie um arquivo e a IA gera flashcards instantaneamente
+                </p>
+                <a href="{% url 'flashcards:create_flashcards' %}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 shadow-sm hover:shadow-md transition-all">
+                    Criar Flashcards
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </a>
+            </div>
+
+            <!-- Card Estudar -->
+            <div class="group relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                    <span class="text-2xl">🤖</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Estudar com IA</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+                    Tire dúvidas com o assistente inteligente baseado nos seus materiais
+                </p>
+                <a href="{% url 'rag:study_chat' %}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 shadow-sm hover:shadow-md transition-all">
+                    Abrir Chat
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </a>
             </div>
         </div>
-
-        <!-- Card Criar Novo -->
-        <div class="rounded-md col-md-6 mb-5 py-10">
-            <div class="card h-100 shadow-lg hover-card">
-                <div class="card-body py-8">
-                    <div class="icon-stack bg-success text-white mb-4">
-                        <i class="fas fa-plus-circle fa-2x"></i>
-                    </div>
-                    <h3
-                        class="mb-2 text-xl font-bold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
-                        Criar Novo Flashcard</h3>
-                    <p class="card-text text-muted mb-6 text-gray-600 dark:text-gray-300">
-                        Comece um novo conjunto de estudos com nossa IA
-                    </p>
-                    <a href="{% url 'flashcards:create_flashcards' %}"
-                        class="btn-pulse inline-block px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                        Novo Flashcard 
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
-
-    <style>
-        .hover-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .card {
-            border-radius: 15px;
-            border: none;
-        }
-
-        .card-body {
-            padding: 2.5rem;
-        }
-
-        /* Animação de pulso nos botões */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
-            }
-            70% {
-                transform: scale(1.02);
-                box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
-            }
-        }
-
-        .btn-pulse {
-            animation: pulse 2s infinite;
-            transition: all 0.3s ease-in-out;
-            position: relative;
-        }
-
-        .btn-pulse:hover {
-            animation: none;
-            transform: scale(1.02);
-        }
-    </style>
 </div>
 {% endblock %}

@@ -1,0 +1,182 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class="pt-8 px-2 md:px-4 lg:px-8 pb-16">
+    <div class="max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
+                 {{ collection.name }}
+            </h1>
+            {% if collection.description %}
+            <p class="mt-2 text-gray-500 dark:text-gray-400">{{ collection.description }}</p>
+            {% endif %}
+            <div class="flex gap-6 justify-center mt-3 text-sm text-gray-400 dark:text-gray-500">
+                <span> {{ collection.document_count }} material{{ collection.document_count|pluralize:"is" }}</span>
+                <span> {{ flashcard_count }} flashcard{{ flashcard_count|pluralize:"s" }}</span>
+
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+            <nav class="-mb-px flex gap-1 overflow-x-auto" id="tabs">
+                <button onclick="showTab('flashcards')" id="tab-flashcards"
+                    class="tab-btn shrink-0 px-5 py-3 text-sm font-semibold border-b-2 border-orange-500 text-orange-600 dark:text-orange-400 transition-colors">
+                     Flashcards
+                </button>
+                <button onclick="showTab('materiais')" id="tab-materiais"
+                    class="tab-btn shrink-0 px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                     Materiais
+                </button>
+                <button onclick="showTab('estudar')" id="tab-estudar"
+                    class="tab-btn shrink-0 px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                     Estudar
+                </button>
+            </nav>
+        </div>
+
+        <!-- TAB: FLASHCARDS -->
+        <div id="panel-flashcards">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <a href="{% url 'flashcards:create_flashcards' %}?collection={{ collection.pk }}"
+                   class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-orange-400 hover:shadow-md transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xl group-hover:scale-110 transition-transform"></div>
+                    <div>
+                        <p class="font-semibold text-gray-900 dark:text-white text-sm">Criar a partir de arquivo</p>
+                        <p class="text-xs text-gray-400">PDF, DOCX, TXT  a IA gera 4 flashcards</p>
+                    </div>
+                </a>
+                <a href="{% url 'rag:contextual_flashcards' %}?collection={{ collection.pk }}"
+                   class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-orange-400 hover:shadow-md transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl group-hover:scale-110 transition-transform"></div>
+                    <div>
+                        <p class="font-semibold text-gray-900 dark:text-white text-sm">Gerar com seus materiais</p>
+                        <p class="text-xs text-gray-400">A IA usa os materiais que voce enviou</p>
+                    </div>
+                </a>
+            </div>
+
+            {% if flashcards %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for card in flashcards %}
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-medium text-orange-500 uppercase mb-1">{{ card.get_card_type_display }}</p>
+                            <h4 class="font-semibold text-gray-900 dark:text-white text-sm leading-snug mb-2 line-clamp-2">{{ card.title }}</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">{{ card.content }}</p>
+                        </div>
+                        <form method="post" action="{% url 'flashcards:excluir_flashcard' card.id %}" class="shrink-0" onsubmit="return confirm('Excluir este flashcard?')">
+                            {% csrf_token %}
+                            <button type="submit" class="text-gray-300 hover:text-red-400 transition-colors mt-0.5" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500">
+                <div class="text-5xl mb-3"></div>
+                <p class="font-medium">Nenhum flashcard ainda nesta sessão.</p>
+                <p class="text-sm mt-1">Crie a partir de um arquivo ou gere com IA usando seus materiais.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- TAB: MATERIAIS -->
+        <div id="panel-materiais" class="hidden">
+            <div class="flex justify-end mb-4">
+                <a href="{% url 'rag:document_upload' %}?collection={{ collection.pk }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-semibold transition-colors">
+                     Enviar Material
+                </a>
+            </div>
+            {% if documents %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for doc in documents %}
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ doc.title }}</h3>
+                            <div class="flex gap-3 text-xs text-gray-400 mt-1 flex-wrap">
+                                <span class="uppercase font-medium">{{ doc.file_type }}</span>
+                                <span>{{ doc.total_chunks }} chunks</span>
+                                <span class="{% if doc.status == 'completed' %}text-green-500{% elif doc.status == 'processing' %}text-yellow-500{% elif doc.status == 'failed' %}text-red-500{% else %}text-gray-400{% endif %} font-medium">{{ doc.get_status_display }}</span>
+                            </div>
+                            <p class="text-xs text-gray-300 dark:text-gray-600 mt-1">{{ doc.uploaded_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="flex gap-1.5 shrink-0">
+                            <a href="{% url 'rag:document_detail' doc.pk %}" class="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-white transition-colors">Ver</a>
+                            <a href="{% url 'rag:document_delete' doc.pk %}" class="px-2.5 py-1 bg-red-50 dark:bg-red-900/20 text-red-500 rounded text-xs hover:bg-red-100 transition-colors"></a>
+                        </div>
+                    </div>
+                    {% if doc.status == 'failed' and doc.error_message %}
+                    <p class="mt-2 text-xs text-red-500 bg-red-50 dark:bg-red-900/20 p-2 rounded"> {{ doc.error_message }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500">
+                <div class="text-5xl mb-3"></div>
+                <p class="font-medium">Nenhum material enviado ainda.</p>
+                <p class="text-sm mt-1">Envie materiais para que a IA possa gerar flashcards automaticamente.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- TAB: ESTUDAR -->
+        <div id="panel-estudar" class="hidden">
+            <div class="max-w-lg mx-auto py-8 text-center">
+                {% if flashcard_count > 0 %}
+                <div class="text-6xl mb-4"></div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Pronto para estudar?</h2>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">
+                    Você tem <strong class="text-orange-500">{{ flashcard_count }} flashcard{{ flashcard_count|pluralize:"s" }}</strong> nesta sessão.
+                    Revise, marque acertos/erros e tire dúvidas com o assistente de IA.
+                </p>
+                <a href="{% url 'rag:study_mode_collection' collection.pk %}"
+                   class="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-bold text-lg shadow-sm hover:shadow-md transition-all">
+                     Iniciar Estudo
+                </a>
+                {% else %}
+                <div class="text-6xl mb-4"></div>
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Sem flashcards para estudar</h2>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Crie flashcards nesta sessão primeiro.</p>
+                <button onclick="showTab('flashcards')" class="px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-semibold transition-colors">
+                    Criar Flashcards
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="flex items-center justify-between mt-10 pt-6 border-t border-gray-100 dark:border-gray-700">
+            <a href="{% url 'flashcards:home_flashcards' %}" class="text-sm text-orange-500 hover:text-orange-600 font-medium"> Início</a>
+            <a href="{% url 'rag:collection_delete' collection.pk %}" class="text-sm text-red-400 hover:text-red-500 transition-colors">Excluir Sessão</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(name) {
+    ['flashcards', 'materiais', 'estudar'].forEach(p => {
+        const panel = document.getElementById('panel-' + p);
+        const tab = document.getElementById('tab-' + p);
+        const isActive = p === name;
+        panel.classList.toggle('hidden', !isActive);
+        tab.classList.toggle('border-orange-500', isActive);
+        tab.classList.toggle('text-orange-600', isActive);
+        tab.classList.toggle('dark:text-orange-400', isActive);
+        tab.classList.toggle('border-transparent', !isActive);
+        tab.classList.toggle('text-gray-500', !isActive);
+        tab.classList.toggle('dark:text-gray-400', !isActive);
+    });
+}
+const hash = window.location.hash.replace('#', '');
+if (['flashcards', 'materiais', 'estudar'].includes(hash)) showTab(hash);
+</script>
+{% endblock %}
