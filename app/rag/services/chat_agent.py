@@ -1,14 +1,19 @@
 """
 Agente de chat para o modo estudo do FlashLearn.
 
-Usa LangGraph (create_react_agent) com 4 ferramentas:
+Usa LangGraph (create_react_agent) com 5 ferramentas:
   - search_docs        — pesquisa semântica nos materiais do aluno
   - get_my_flashcards  — lista flashcards do aluno por tópico
   - create_flashcard   — cria novo flashcard durante a conversa
   - get_study_summary  — resumo de progresso e estatísticas de revisão
+  - search_web         — busca na internet via Tavily (fallback: DuckDuckGo)
 
 O contexto do usuário (user_id, collection_id) é injetado via
 RunnableConfig['configurable'] de forma thread-safe, sem estado global.
+
+Variáveis de ambiente necessárias:
+  - GOOGLE_API_KEY   — obrigatória para o LLM e embeddings
+  - TAVILY_API_KEY   — recomendada para busca web (https://app.tavily.com)
 """
 
 import logging
@@ -177,21 +182,77 @@ def get_study_summary(config: RunnableConfig) -> str:
     )
 
 
+@tool
+def search_web(query: str) -> str:
+    """
+    Busca informações atuais na internet para complementar a resposta.
+    Use quando a pergunta envolver dados recentes, notícias, eventos, conceitos
+    não presentes nos materiais do aluno ou quando search_docs retornar vazio.
+    Prefira search_docs para conteúdo dos materiais do aluno; use search_web
+    para conhecimento geral, atualidades ou tópicos externos.
+    """
+    tavily_key = os.getenv("TAVILY_API_KEY")
+
+    # ── Tavily (recomendado) ──────────────────────────────────────────────────
+    if tavily_key:
+        try:
+            from tavily import TavilyClient
+            client = TavilyClient(api_key=tavily_key)
+            response = client.search(
+                query=query,
+                max_results=5,
+                search_depth="basic",
+                include_answer=True,
+            )
+            parts = []
+            # Resposta direta sintetizada pelo Tavily (quando disponível)
+            if response.get("answer"):
+                parts.append(f"Resposta direta: {response['answer']}")
+            # Resultados individuais
+            for r in response.get("results", []):
+                title = r.get("title", "Fonte")
+                url = r.get("url", "")
+                snippet = r.get("content", "")[:400]
+                parts.append(f"[{title}]({url})\n{snippet}")
+            if parts:
+                return "\n\n---\n\n".join(parts)
+            return "Nenhum resultado encontrado na web."
+        except Exception as e:
+            logger.warning(f"Tavily falhou ({e}); tentando DuckDuckGo…")
+
+    # ── DuckDuckGo (fallback gratuito) ────────────────────────────────────────
+    try:
+        from langchain_community.tools import DuckDuckGoSearchRun
+        ddg = DuckDuckGoSearchRun()
+        result = ddg.invoke(query)
+        return result if result else "Nenhum resultado encontrado na web."
+    except Exception as e:
+        logger.error(f"DuckDuckGo também falhou: {e}")
+        return (
+            "Não foi possível realizar a busca na internet no momento. "
+            "Configure TAVILY_API_KEY para habilitar esta funcionalidade "
+            "(https://app.tavily.com — plano gratuito disponível)."
+        )
+
+
 # ─── Agente ──────────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = (
     "Você é um tutor inteligente do FlashLearn, especializado em ajudar alunos "
     "a estudar de forma eficaz e personalizada.\n\n"
     "Ferramentas disponíveis:\n"
-    "  • search_docs — pesquisa nos materiais enviados pelo aluno\n"
+    "  • search_docs      — pesquisa nos materiais enviados pelo aluno\n"
     "  • get_my_flashcards — lista flashcards existentes por tópico\n"
-    "  • create_flashcard — salva um novo flashcard para o aluno\n"
-    "  • get_study_summary — exibe estatísticas de progresso\n\n"
+    "  • create_flashcard  — salva um novo flashcard para o aluno\n"
+    "  • get_study_summary — exibe estatísticas de progresso\n"
+    "  • search_web        — busca informações atuais na internet\n\n"
     "Diretrizes:\n"
     "  - Sempre responda em português brasileiro, de forma clara e didática.\n"
-    "  - Use search_docs antes de responder perguntas sobre conteúdo de estudo.\n"
+    "  - Prioridade de fontes: 1º search_docs (material do aluno) → 2º search_web (internet) → 3º conhecimento próprio.\n"
+    "  - Use search_docs antes de qualquer resposta sobre conteúdo de estudo.\n"
+    "  - Se search_docs não retornar nada relevante, use search_web para buscar na internet.\n"
+    "  - Ao usar search_web, cite as fontes encontradas na resposta final.\n"
     "  - Quando criar um flashcard, confirme ao aluno o título e um trecho do conteúdo.\n"
-    "  - Se não houver material relevante, responda com seu conhecimento geral e avise.\n"
     "  - Mantenha respostas objetivas; aprofunde quando o aluno pedir."
 )
 
@@ -205,7 +266,7 @@ def _build_agent():
         temperature=0.4,
         max_output_tokens=800,
     )
-    tools = [search_docs, get_my_flashcards, create_flashcard, get_study_summary]
+    tools = [search_docs, get_my_flashcards, create_flashcard, get_study_summary, search_web]
     return create_react_agent(llm, tools, prompt=SYSTEM_PROMPT)
 
 
